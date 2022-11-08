@@ -4,6 +4,7 @@ import com.unittest.practice.user.IRepository;
 import com.unittest.practice.user.User;
 import com.unittest.practice.user.UserTestVariables;
 import com.unittest.practice.utils.CustomException;
+import com.unittest.practice.utils.OtherService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,12 +22,14 @@ class ServiceTest {
     private Service underTest;
     @Mock
     private IRepository mockRepo;
+    @Mock
+    private OtherService mockOtherService;
 
     @BeforeEach
     void setUp() throws MockitoException {
         MockitoAnnotations.openMocks(this);
 
-        underTest = new Service(mockRepo);
+        underTest = new Service(mockRepo, mockOtherService);
     }
 
     @Test
@@ -112,5 +115,37 @@ class ServiceTest {
         assertNotNull(actualException);
         assertEquals(expectedErrorMessage, actualException.getMessage());
         verify(mockRepo, times(1)).Persist(input);
+    }
+
+    @Test
+    void someFunction_test() throws Exception{
+        User input = UserTestVariables.VALID_USER;
+        String expected = "appending-string-some-string";
+
+        Mockito.mockStatic(Calendar.class);
+        Calendar calendarMock = Mockito.mock(Calendar.class);
+        when(Calendar.getInstance()).thenReturn(calendarMock);
+        when(calendarMock.getTime()).thenReturn(MOCK_DATE);
+
+        when(mockRepo.Persist(UserTestVariables.VALID_USER_WITH_TS))
+            .thenReturn(UserTestVariables.VALID_USER_FULL);
+
+        when(mockOtherService.generateSomeString(UserTestVariables.VALID_USER_FULL))
+            .thenReturn("some-string");
+
+        Exception actualException = null;
+        String actual = null;
+        try {
+            actual = underTest.someFunction(input);
+        } catch (Exception exception) {
+            actualException = exception;
+        }
+
+        assertNotNull(actual);
+        assertNull(actualException);
+        assertEquals(expected, actual);
+        verify(mockRepo, times(1)).Persist(input);
+        verify(mockOtherService, times(1))
+            .generateSomeString(UserTestVariables.VALID_USER_FULL);
     }
 }

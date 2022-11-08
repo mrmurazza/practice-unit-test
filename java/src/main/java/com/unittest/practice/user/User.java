@@ -24,9 +24,14 @@ public class User {
         this.timestamp = timestamp;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
+
     public void validate() throws CustomException {
         if (name == null || name.isEmpty()) {
             throw new CustomException("name cannot be empty");
